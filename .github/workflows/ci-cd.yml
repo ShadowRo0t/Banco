@@ -33,8 +33,10 @@ jobs:
           pip install pytest pytest-asyncio
 
       - name: Run Pytest
+        env:
+          PYTHONPATH: .
         run: |
-          pytest -v
+          python -m pytest -v
 
   build-and-push:
     name: Build & Publish Docker Image
