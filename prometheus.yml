@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s # Scrape rápido para pruebas y simulación en tiempo real
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "banco-api-service"
+    static_configs:
+      - targets: ["api:8000"]

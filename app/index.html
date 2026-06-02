@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco - Portal de Clasificación de Incidentes</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1f2937;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --font-family: 'Plus Jakarta Sans', sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+
+        /* Header / Navbar */
+        header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: initial;
+            -webkit-text-fill-color: initial;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.6rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .health-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-connected {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .status-disconnected {
+            background-color: var(--danger);
+            box-shadow: 0 0 10px var(--danger);
+        }
+
+        /* Main Content Container */
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero / Header within section */
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* USER VIEW LAYOUT */
+        .user-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 968px) {
+            .user-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-card {
+            background: rgba(17, 24, 39, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            opacity: 0.8;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .textarea-styled {
+            width: 100%;
+            min-height: 150px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        .textarea-styled:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.9rem;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .chip:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.45);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Result Area */
+        .result-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 380px;
+            color: var(--text-muted);
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .result-placeholder i {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-container {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            padding: 0.4rem 0.85rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .badge-alta {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+        }
+
+        .badge-media {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-baja {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-card-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .result-card-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .response-text {
+            border-left: 3.5px solid var(--accent-blue);
+            background: rgba(59, 130, 246, 0.04);
+            padding-left: 1rem;
+            font-style: italic;
+        }
+
+        .meta-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .meta-box-num {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .meta-box-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        /* Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ADMIN VIEW LAYOUT */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: rgba(17, 24, 39, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-card-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .stat-card-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+        }
+
+        .stat-card-icon {
+            font-size: 1.75rem;
+            color: var(--text-muted);
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-total { border-left: 4px solid var(--accent-blue); }
+        .stat-total .stat-card-icon { color: var(--accent-blue); background: rgba(59, 130, 246, 0.05); }
+
+        .stat-alta { border-left: 4px solid var(--danger); }
+        .stat-alta .stat-card-icon { color: var(--danger); background: rgba(239, 68, 68, 0.05); }
+
+        .stat-media { border-left: 4px solid var(--warning); }
+        .stat-media .stat-card-icon { color: var(--warning); background: rgba(245, 158, 11, 0.05); }
+
+        .stat-lat { border-left: 4px solid var(--accent-cyan); }
+        .stat-lat .stat-card-icon { color: var(--accent-cyan); background: rgba(6, 182, 212, 0.05); }
+
+        /* Admin Controls & Table */
+        .admin-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .input-styled {
+            width: 100%;
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .input-styled:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.7rem 1.2rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-secondary);
+        }
+
+        .btn-action-primary {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2));
+            border-color: rgba(59, 130, 246, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        .btn-action-primary:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(6, 182, 212, 0.3));
+            border-color: rgba(59, 130, 246, 0.5);
+            color: white;
+        }
+
+        /* Database Table */
+        .table-card {
+            background: rgba(17, 24, 39, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.92rem;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.75px;
+        }
+
+        td {
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .table-text-snippet {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .table-empty {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .table-empty i {
+            font-size: 3rem;
+        }
+
+        .btn-view-details {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .btn-view-details:hover {
+            color: var(--accent-cyan);
+            text-decoration: underline;
+        }
+
+        /* Modal Details */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .json-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 250px;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background: rgba(11, 15, 25, 0.8);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        footer a:hover {
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>BANCO</span>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchView('user')">
+                    <i class="fa-solid fa-user"></i> Portal Usuario
+                </button>
+                <button class="tab-btn" onclick="switchView('admin')">
+                    <i class="fa-solid fa-chart-line"></i> Admin Dashboard
+                </button>
+            </div>
+
+            <div class="health-status">
+                <span id="health-dot" class="status-dot status-disconnected"></span>
+                <span id="health-text">Ollama: Desconectado</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main>
+
+        <!-- USER PORTAL VIEW -->
+        <section id="user-view" class="view-section active">
+            <div class="section-header">
+                <h1>Clasificación Automática de Incidentes</h1>
+                <p>Describe tu inconveniente o consulta bancaria de manera natural. Nuestra IA local clasificará y derivará tu caso al instante de forma totalmente segura.</p>
+            </div>
+
+            <div class="user-grid">
+                <!-- Submission Panel -->
+                <div class="panel-card">
+                    <div class="form-group">
+                        <label class="form-label">¿Qué inconveniente o consulta tienes hoy?</label>
+                        <textarea id="user-text" class="textarea-styled" placeholder="Escribe aquí de forma detallada, por ejemplo: No reconozco una compra de $500 en mi cuenta de débito realizada ayer..."></textarea>
+                    </div>
+
+                    <div class="form-label" style="margin-bottom: 0.5rem;">Sugerencias rápidas de prueba:</div>
+                    <div class="chips-container">
+                        <button class="chip" onclick="populateText('Me clonaron la tarjeta de crédito en un cajero esta mañana y tengo múltiples cargos sospechosos por compras que no realicé.')">
+                            <i class="fa-solid fa-shield-virus"></i> Clonación / Fraude (Alta)
+                        </button>
+                        <button class="chip" onclick="populateText('Tengo un cobro duplicado en mi cuenta. Me cobraron la misma factura de internet dos veces ayer en la app.')">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> Cobro Duplicado (Media)
+                        </button>
+                        <button class="chip" onclick="populateText('Hola, me gustaría consultar los horarios de atención de la sucursal del centro y cuáles son los requisitos para abrir una cuenta de ahorros.')">
+                            <i class="fa-solid fa-circle-info"></i> Consultas / Horarios (Baja)
+                        </button>
+                    </div>
+
+                    <button id="submit-btn" class="btn-submit" onclick="submitTicket()">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar a Clasificación
+                    </button>
+                </div>
+
+                <!-- Live Results Panel -->
+                <div class="panel-card">
+                    <!-- Placeholder State -->
+                    <div id="result-placeholder" class="result-placeholder">
+                        <i class="fa-solid fa-brain-circuit"></i>
+                        <h3>Listo para procesar</h3>
+                        <p>Escribe tu consulta y haz clic en \"Enviar\" para iniciar la inferencia con el LLM en tiempo real.</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="result-loading" class="result-placeholder" style="display: none;">
+                        <span class="spinner" style="width: 40px; height: 40px; border-width: 4px;"></span>
+                        <h3>Procesando Incidente</h3>
+                        <p>La IA local de Ollama está extrayendo información y generando la clasificación estructurada...</p>
+                    </div>
+
+                    <!-- Result Output -->
+                    <div id="result-container" class="result-container">
+                        <div class="result-header">
+                            <div class="result-title">Análisis en Tiempo Real</div>
+                            <span id="res-badge" class="badge">Prioridad</span>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-card-label">Categoría Identificada</div>
+                            <div id="res-category" class="result-card-value">Operaciones bancarias</div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-card-label">Motivo de Clasificación</div>
+                            <div id="res-reason" class="result-card-value">Motivo descriptivo</div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-card-label">Derivación y Resolución</div>
+                            <div class="result-card-value" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i id="res-deriv-icon" class="fa-solid fa-headset" style="color: var(--accent-blue);"></i>
+                                <span id="res-deriv-method" style="font-weight: 600;">Derivar a Humano (Operador)</span>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-card-label">Respuesta Automática Sugerida</div>
+                            <div id="res-suggested" class="result-card-value response-text">Respuesta sugerida</div>
+                        </div>
+
+                        <div class="meta-info-grid">
+                            <div class="meta-box">
+                                <div id="res-time" class="meta-box-num">0 ms</div>
+                                <div class="meta-box-label">Procesamiento</div>
+                            </div>
+                            <div class="meta-box">
+                                <div id="res-model" class="meta-box-num">Modelo</div>
+                                <div class="meta-box-label">Motor Utilizado</div>
+                            </div>
+                            <div class="meta-box">
+                                <div id="res-fallback" class="meta-box-num">No</div>
+                                <div class="meta-box-label">Modo Fallback</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ADMINISTRATOR DASHBOARD VIEW -->
+        <section id="admin-view" class="view-section">
+            <div class="section-header">
+                <h1>Panel de Control de Operaciones</h1>
+                <p>Monitorea y analiza el flujo de incidentes clasificados en tiempo real. Evalúa el desempeño del LLM, latencias del servicio y derivaciones.</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-total">
+                    <div class="stat-card-left">
+                        <div class="stat-card-label">Total Casos</div>
+                        <div id="stat-total" class="stat-card-value">0</div>
+                    </div>
+                    <i class="fa-solid fa-list-check stat-card-icon"></i>
+                </div>
+                <div class="stat-card stat-alta">
+                    <div class="stat-card-left">
+                        <div class="stat-card-label">Prioridad Alta</div>
+                        <div id="stat-alta" class="stat-card-value">0</div>
+                    </div>
+                    <i class="fa-solid fa-triangle-exclamation stat-card-icon"></i>
+                </div>
+                <div class="stat-card stat-media">
+                    <div class="stat-card-left">
+                        <div class="stat-card-label">Prioridad Media/Baja</div>
+                        <div id="stat-medbaja" class="stat-card-value">0</div>
+                    </div>
+                    <i class="fa-solid fa-scale-balanced stat-card-icon"></i>
+                </div>
+                <div class="stat-card stat-lat">
+                    <div class="stat-card-left">
+                        <div class="stat-card-label">Latencia Promedio</div>
+                        <div id="stat-latency" class="stat-card-value">0 ms</div>
+                    </div>
+                    <i class="fa-solid fa-gauge-high stat-card-icon"></i>
+                </div>
+            </div>
+
+            <!-- Table Actions & Controls -->
+            <div class="admin-controls">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="admin-search" class="input-styled" placeholder="Buscar incidentes por descripción o motivo..." oninput="filterTable()">
+                </div>
+                
+                <div class="admin-actions">
+                    <button class="btn-action" onclick="clearHistory()">
+                        <i class="fa-solid fa-trash-can"></i> Limpiar Historial
+                    </button>
+                    <button class="btn-action btn-action-primary" onclick="simulateLoad()">
+                        <i class="fa-solid fa-bolt"></i> Simular Entrada IA
+                    </button>
+                </div>
+            </div>
+
+            <!-- Incidents Data Grid -->
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table id="incidents-table">
+                        <thead>
+                            <tr>
+                                <th>Incidente</th>
+                                <th>Prioridad</th>
+                                <th>Categoría</th>
+                                <th>Canal Sugerido</th>
+                                <th>Latencia</th>
+                                <th>Método Motor</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidents-tbody">
+                            <!-- Rows dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty State -->
+                <div id="table-empty-state" class="table-empty">
+                    <i class="fa-solid fa-database" style="color: var(--text-muted);"></i>
+                    <h3>Historial de incidentes vacío</h3>
+                    <p>Usa el Portal de Usuario para enviar consultas o haz clic en \"Simular Entrada IA\" para poblar el panel.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Details View Modal -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-title">
+                <i class="fa-solid fa-file-invoice"></i> Detalle de Incidente Clasificado
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary);">TEXTO ORIGINAL DEL CLIENTE:</div>
+                    <div id="modal-text" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color); line-height: 1.5;">Texto original</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <div style="font-weight: 700; margin-bottom: 0.25rem; color: var(--text-secondary);">PRIORIDAD DETECTADA:</div>
+                        <span id="modal-priority" class="badge">PRIORIDAD</span>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; margin-bottom: 0.25rem; color: var(--text-secondary);">CATEGORÍA:</div>
+                        <span id="modal-category" style="font-weight: 600; color: var(--accent-cyan);">Categoría</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary);">JUSTIFICACIÓN / MOTIVO DE LA PRIORIDAD:</div>
+                    <div id="modal-reason" style="line-height: 1.5;">Justificación</div>
+                </div>
+
+                <div>
+                    <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary);">RESPUESTA SUGERIDA AL CLIENTE:</div>
+                    <div id="modal-suggested" class="response-text" style="line-height: 1.5; padding: 0.75rem 1rem;">Respuesta sugerida</div>
+                </div>
+
+                <div>
+                    <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary);">DATOS TÉCNICOS Y MÉTRICAS:</div>
+                    <pre id="modal-json" class="json-block">{}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div>&copy; 2026 Banco. Todos los derechos reservados. | Sistema de Privacidad Financiera Local AI</div>
+    </footer>
+
+    <!-- Main Logic Script -->
+    <script>
+        // In-memory Database for local session history
+        let database = JSON.parse(localStorage.getItem('banco_incidents_db')) || [];
+
+        // Simulated Banking Incident Templates for Load Generation
+        const simulatedIncidents = [
+            {
+                text: "Ayer retiré $200 del cajero automático pero la máquina solo me entregó $100. Sin embargo, en mi aplicación del banco aparece descontada la cantidad completa de $200.",
+                expected: { prioridad: "MEDIA", categoria: "Facturación / Cobros" }
+            },
+            {
+                text: "URGENTE: Acabo de recibir un mensaje SMS diciendo que mi clave de internet ha sido bloqueada y me pide ingresar a un link extraño. Creo que es una estafa o hackeo.",
+                expected: { prioridad: "ALTA", categoria: "Fraude / Seguridad" }
+            },
+            {
+                text: "Hola, buenos días. ¿Me podrían informar cuáles son los horarios de la sucursal de Paseo de la Reforma el sábado y si tienen estacionamiento?",
+                expected: { prioridad: "BAJA", categoria: "Consultas Generales" }
+            },
+            {
+                text: "Perdí mi billetera con todas mis pertenencias hace 10 minutos en la calle. Necesito por favor que bloqueen todas mis tarjetas de débito y crédito inmediatamente por seguridad.",
+                expected: { prioridad: "ALTA", categoria: "Fraude / Seguridad" }
+            },
+            {
+                text: "Quiero solicitar un estado de cuenta de mi tarjeta de crédito del mes de marzo para realizar mi declaración anual de impuestos. ¿Cómo lo puedo descargar de la app?",
+                expected: { prioridad: "BAJA", categoria: "Consultas Generales" }
+            },
+            {
+                text: "Hola, hice una transferencia bancaria SPEI a un amigo hace dos horas, el dinero se debitó de mi saldo pero a él no le ha llegado la transferencia. El número de rastreo es 38491.",
+                expected: { prioridad: "MEDIA", categoria: "Operaciones / Cuentas" }
+            },
+            {
+                text: "Me llegó una notificación en la app del banco sobre una compra aprobada de $1,200 pesos en una tienda departamental que yo no he realizado. Estoy en mi casa y tengo la tarjeta conmigo.",
+                expected: { prioridad: "ALTA", categoria: "Fraude / Seguridad" }
+            },
+            {
+                text: "Buenas tardes, quiero abrir una cuenta de inversión a plazo fijo y me gustaría saber cuál es la tasa de interés anual que ofrecen actualmente para montos mayores a $50,000.",
+                expected: { prioridad: "BAJA", categoria: "Consultas Generales" }
+            }
+        ];
+
+        // Bootstrapping
+        document.addEventListener("DOMContentLoaded", () => {
+            checkHealth();
+            updateDashboardMetrics();
+            renderTable();
+            
+            // Poll health state every 10 seconds
+            setInterval(checkHealth, 10000);
+        });
+
+        // Switch Tabs View
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            if (viewName === 'user') {
+                document.getElementById('user-view').classList.add('active');
+                document.querySelector('[onclick=\"switchView(\'user\')\"]').classList.add('active');
+            } else if (viewName === 'admin') {
+                document.getElementById('admin-view').classList.add('active');
+                document.querySelector('[onclick=\"switchView(\'admin\')\"]').classList.add('active');
+                updateDashboardMetrics();
+                renderTable();
+            }
+        }
+
+        // Check FastAPI and Ollama Status
+        async function checkHealth() {
+            const healthDot = document.getElementById('health-dot');
+            const healthText = document.getElementById('health-text');
+            
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.ollama_status === 'connected') {
+                        healthDot.className = 'status-dot status-connected';
+                        healthText.innerText = 'Ollama: Conectado (' + data.version + ')';
+                    } else {
+                        healthDot.className = 'status-dot status-disconnected';
+                        healthText.innerText = 'Ollama: Desconectado';
+                    }
+                } else {
+                    healthDot.className = 'status-dot status-disconnected';
+                    healthText.innerText = 'API: Desconectada';
+                }
+            } catch (err) {
+                healthDot.className = 'status-dot status-disconnected';
+                healthText.innerText = 'Servidor Caído';
+            }
+        }
+
+        // Fill user textarea with suggestions
+        function populateText(text) {
+            document.getElementById('user-text').value = text;
+        }
+
+        // Submit Ticket classification request
+        async function submitTicket() {
+            const textInput = document.getElementById('user-text').value.trim();
+            const submitBtn = document.getElementById('submit-btn');
+            
+            if (textInput.length < 5) {
+                alert("Por favor escribe una consulta válida (mínimo 5 caracteres).");
+                return;
+            }
+
+            // UI Loading state
+            document.getElementById('result-placeholder').style.display = 'none';
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('result-loading').style.display = 'flex';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner"></span> Procesando...`;
+
+            try {
+                const response = await fetch('/classify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textInput })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error en la llamada de clasificación");
+                }
+
+                const result = await response.json();
+                
+                // Save to local database
+                const record = {
+                    id: 'INC-' + Math.floor(1000 + Math.random() * 9000),
+                    timestamp: new Date().toLocaleTimeString(),
+                    text: textInput,
+                    ...result
+                };
+                
+                database.unshift(record);
+                localStorage.setItem('banco_incidents_db', JSON.stringify(database));
+
+                // Display Results
+                displayUserResult(record);
+            } catch (error) {
+                console.error("Error al procesar:", error);
+                alert("Error al intentar comunicarse con el servidor AI de clasificación bancaria. Asegúrate de levantar el backend de FastAPI.");
+                
+                document.getElementById('result-placeholder').style.display = 'flex';
+                document.getElementById('result-loading').style.display = 'none';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Enviar a Clasificación`;
+            }
+        }
+
+        // Render response results to user page
+        function displayUserResult(record) {
+            document.getElementById('result-loading').style.display = 'none';
+            document.getElementById('result-placeholder').style.display = 'none';
+            
+            const container = document.getElementById('result-container');
+            container.style.display = 'block';
+
+            // Priority Badge
+            const badge = document.getElementById('res-badge');
+            badge.innerText = record.prioridad;
+            badge.className = 'badge'; // Reset
+            
+            if (record.prioridad === 'ALTA') {
+                badge.classList.add('badge-alta');
+            } else if (record.prioridad === 'MEDIA') {
+                badge.classList.add('badge-media');
+            } else {
+                badge.classList.add('badge-baja');
+            }
+
+            // Text Outputs
+            document.getElementById('res-category').innerText = record.categoria;
+            document.getElementById('res-reason').innerText = record.motivo;
+            document.getElementById('res-deriv-method').innerText = record.metodo_derivacion + (record.derivar_a_humano ? ' (Humano)' : ' (Auto-servicio)');
+            document.getElementById('res-suggested').innerText = record.respuesta_sugerida;
+
+            // Metadatos
+            document.getElementById('res-time').innerText = Math.round(record.tiempo_procesamiento_ms) + ' ms';
+            document.getElementById('res-model').innerText = record.modelo_utilizado;
+            document.getElementById('res-fallback').innerText = record.es_fallback ? 'Sí (Regex)' : 'No (Ollama)';
+
+            // Icon for derivation
+            const derivIcon = document.getElementById('res-deriv-icon');
+            if (record.derivar_a_humano) {
+                derivIcon.className = 'fa-solid fa-user-tie';
+                derivIcon.style.color = 'var(--danger)';
+            } else {
+                derivIcon.className = 'fa-solid fa-robot';
+                derivIcon.style.color = 'var(--success)';
+            }
+        }
+
+        // Update administrator statistics dashboard counters
+        function updateDashboardMetrics() {
+            const totalCount = database.length;
+            const altaCount = database.filter(item => item.prioridad === 'ALTA').length;
+            const medbajaCount = totalCount - altaCount;
+            
+            let avgLatency = 0;
+            if (totalCount > 0) {
+                const sum = database.reduce((acc, curr) => acc + curr.tiempo_procesamiento_ms, 0);
+                avgLatency = Math.round(sum / totalCount);
+            }
+
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('stat-alta').innerText = altaCount;
+            document.getElementById('stat-medbaja').innerText = medbajaCount;
+            document.getElementById('stat-latency').innerText = avgLatency + ' ms';
+        }
+
+        // Render Recent Incidents Grid Table
+        function renderTable(filterQuery = '') {
+            const tbody = document.getElementById('incidents-tbody');
+            const emptyState = document.getElementById('table-empty-state');
+            
+            tbody.innerHTML = '';
+            
+            // Filter query
+            const filteredData = database.filter(item => {
+                const searchStr = (item.text + ' ' + item.categoria + ' ' + item.motivo + ' ' + item.prioridad).toLowerCase();
+                return searchStr.includes(filterQuery.toLowerCase());
+            });
+
+            if (filteredData.length === 0) {
+                emptyState.style.display = 'flex';
+                document.getElementById('incidents-table').style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            document.getElementById('incidents-table').style.display = 'table';
+
+            filteredData.forEach(record => {
+                const tr = document.createElement('tr');
+                
+                // Priority Badge inside Table
+                let badgeClass = 'badge-baja';
+                if (record.prioridad === 'ALTA') badgeClass = 'badge-alta';
+                else if (record.prioridad === 'MEDIA') badgeClass = 'badge-media';
+
+                const timeStr = Math.round(record.tiempo_procesamiento_ms) + ' ms';
+                const motorStr = record.es_fallback ? 'Fallback (Regex)' : record.modelo_utilizado;
+
+                tr.innerHTML = `
+                    <td class="table-text-snippet" title="${record.text}">${record.text}</td>
+                    <td><span class="badge ${badgeClass}">${record.prioridad}</span></td>
+                    <td>${record.categoria}</td>
+                    <td>${record.metodo_derivacion}</td>
+                    <td>${timeStr}</td>
+                    <td style="color: var(--text-secondary); font-size: 0.82rem;">${motorStr}</td>
+                    <td>
+                        <button class="btn-view-details" onclick="openDetailsModal('${record.id}')">
+                            <i class="fa-solid fa-eye"></i> Detalles
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filter Table on Search Input
+        function filterTable() {
+            const query = document.getElementById('admin-search').value.trim();
+            renderTable(query);
+        }
+
+        // Clear Database history
+        function clearHistory() {
+            if (confirm("¿Estás seguro de que deseas limpiar el historial de incidentes?")) {
+                database = [];
+                localStorage.removeItem('banco_incidents_db');
+                updateDashboardMetrics();
+                renderTable();
+            }
+        }
+
+        // Simulate a live customer request inside Admin Dashboard
+        async function simulateLoad() {
+            // Pick a random incident from templates
+            const randomIndex = Math.floor(Math.random() * simulatedIncidents.length);
+            const template = simulatedIncidents[randomIndex];
+            
+            // Add a temporary overlay spinner on table
+            const btn = document.querySelector('.btn-action-primary');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Simulando...`;
+
+            try {
+                const response = await fetch('/classify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: template.text })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const record = {
+                        id: 'INC-' + Math.floor(1000 + Math.random() * 9000),
+                        timestamp: new Date().toLocaleTimeString(),
+                        text: template.text,
+                        ...result
+                    };
+                    
+                    database.unshift(record);
+                    localStorage.setItem('banco_incidents_db', JSON.stringify(database));
+                    
+                    updateDashboardMetrics();
+                    renderTable();
+                } else {
+                    alert("El backend de FastAPI está activo pero falló al clasificar la simulación.");
+                }
+            } catch (err) {
+                // Generate a mock offline record if Server is down as placeholder
+                const mockDuration = Math.random() * 4 + 1.2; // 1-5ms
+                const mockRecord = {
+                    id: 'INC-' + Math.floor(1000 + Math.random() * 9000),
+                    timestamp: new Date().toLocaleTimeString(),
+                    text: template.text,
+                    prioridad: template.expected.prioridad,
+                    categoria: template.expected.categoria,
+                    motivo: "Clasificación local offline simulada ante caída del servidor.",
+                    derivar_a_humano: template.expected.prioridad === 'ALTA',
+                    metodo_derivacion: template.expected.prioridad === 'ALTA' ? "Operador de Emergencias" : "Auto-servicio",
+                    respuesta_sugerida: "Hemos guardado tu caso de simulación exitosamente.",
+                    tiempo_procesamiento_ms: mockDuration,
+                    modelo_utilizado: "Simulador de Fallback Local",
+                    es_fallback: true
+                };
+                
+                database.unshift(mockRecord);
+                localStorage.setItem('banco_incidents_db', JSON.stringify(database));
+                updateDashboardMetrics();
+                renderTable();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Simular Entrada IA`;
+            }
+        }
+
+        // Modal Operations
+        function openDetailsModal(recordId) {
+            const record = database.find(item => item.id === recordId);
+            if (!record) return;
+
+            document.getElementById('modal-text').innerText = record.text;
+            
+            // Priority
+            const priorityBadge = document.getElementById('modal-priority');
+            priorityBadge.innerText = record.prioridad;
+            priorityBadge.className = 'badge';
+            if (record.prioridad === 'ALTA') priorityBadge.classList.add('badge-alta');
+            else if (record.prioridad === 'MEDIA') priorityBadge.classList.add('badge-media');
+            else priorityBadge.classList.add('badge-baja');
+
+            // Rest
+            document.getElementById('modal-category').innerText = record.categoria;
+            document.getElementById('modal-reason').innerText = record.motivo;
+            document.getElementById('modal-suggested').innerText = record.respuesta_sugerida;
+
+            // Formatted JSON metadata details
+            const technicalMetadata = {
+                id_incidente: record.id,
+                canal_origen: "Portal Web / Chat",
+                tiempo_resolucion: record.tiempo_procesamiento_ms.toFixed(2) + " ms",
+                motor_inferencia: record.modelo_utilizado,
+                activacion_fallback: record.es_fallback,
+                requiere_operador: record.derivar_a_humano,
+                cola_resolucion: record.metodo_derivacion
+            };
+            document.getElementById('modal-json').innerText = JSON.stringify(technicalMetadata, null, 4);
+
+            document.getElementById('details-modal').style.display = 'flex';
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('details-modal').style.display = 'none';
+        }
+
+        // Close modal on outer overlay click
+        window.onclick = function(event) {
+            const modal = document.getElementById('details-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

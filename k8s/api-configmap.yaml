@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: banco-api-config
+  namespace: default
+data:
+  OLLAMA_HOST: "http://ollama-service:11434"
+  OLLAMA_MODEL: "llama3.2:3b"
+  APP_ENV: "production"
+  LLM_TIMEOUT_SECONDS: "10.0"
+  LATENCY_THRESHOLD_MS: "5000.0"
