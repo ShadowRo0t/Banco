@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: actions/setup-docker-action@v4
+        uses: docker/setup-buildx-action@v3
         # Opcional, pero se recomienda configurar Docker Buildx de forma estándar
         
       - name: Log in to GitHub Container Registry
